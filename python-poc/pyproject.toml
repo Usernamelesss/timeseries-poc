@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "python-ts"
+packages = [
+    { include = "timeseries", from = "src" },
+]
+version = "0.1.0"
+description = ""
+authors = ["Adriano Gigliuto <adriano.gigliuto@moveax.it>"]
+
+[tool.poetry.dependencies]
+python = "~3.12"
+loguru = "^0.7.3"
+pandas = "^2.2.3"
+pyarrow = "^19.0.1"
+
+[tool.poetry.group.seeding.dependencies]
+mockseries = "^0.3.1"
+
+[tool.poetry.group.lint.dependencies]
+black = "^23.7.0"
+unimport = "^1.2.1"
+isort = "^5.13.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+src_paths = ["src", "tests"]
+
+[tool.unimport]
+exclude = '.venv/'
+
+[tool.pytest.ini_options]
+testpaths = ["tests/"]
+markers = ["integration: requires running containers"]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:environs.*:",
+    "ignore::ResourceWarning"
+]

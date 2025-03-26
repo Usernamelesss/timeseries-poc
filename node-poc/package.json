@@ -1,0 +1,14 @@
+{
+  "name": "node-poc",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "esrun": "^3.2.26",
+    "hyparquet": "^1.9.1",
+    "typescript": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.13"
+  }
+}

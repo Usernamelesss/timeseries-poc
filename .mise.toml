@@ -1,0 +1,19 @@
+[tools]
+poetry = { version = "1.7", pyproject = "{{config_root}}/python-poc/pyproject.toml" }
+python = { version = "3.12", virtualenv = "{{config_root}}/python-poc/.venv" } # must be after poetry so the poetry bin is first in PATH
+
+go = "1.22.12"
+
+node = "22"
+"npm:lerna" = "3.20.2"
+yarn = "1.22.19"
+rust = { version = "latest", components = "rustc,cargo,rustfmt,rust-std,rust-analyzer,rust-src", targets = "x86,ARMv8" }
+
+[env]
+MISE_EXPERIMENTAL = "1"  # to use python virtualenv activation
+MISE_POETRY_AUTO_INSTALL = "1"  # to automatically run poetry install to create the virtualenv.
+
+PROJECT_ROOT = "{{config_root}}"
+
+[settings]
+python_compile = true
