@@ -12,6 +12,7 @@ rust = { version = "latest", components = "rustc,cargo,rustfmt,rust-std,rust-ana
 [env]
 MISE_EXPERIMENTAL = "1"  # to use python virtualenv activation
 MISE_POETRY_AUTO_INSTALL = "1"  # to automatically run poetry install to create the virtualenv.
+GOROOT = "~/.local/share/mise/installs/go/1.22.12/bin/go"
 
 PROJECT_ROOT = "{{config_root}}"
 
