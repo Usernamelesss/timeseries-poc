@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"database/sql"
 	"fmt"
 	"math"
 	"sync"
@@ -8,29 +9,38 @@ import (
 )
 
 func BenchDivideBy2(data TimeSeries) {
-	result := make([][]float64, len(data))
+	result := make([][]sql.NullFloat64, len(data))
 
 	start := time.Now()
 	m := data.ToMatrix()
 	for rowIdx := 0; rowIdx < len(m); rowIdx++ {
-		result[rowIdx] = make([]float64, len(m[rowIdx]))
+		result[rowIdx] = make([]sql.NullFloat64, len(m[rowIdx]))
 		for colIdx := 0; colIdx < len(m[rowIdx]); colIdx++ {
-			result[rowIdx][colIdx] = m[rowIdx][colIdx] / 2
+			result[rowIdx][colIdx] = sql.NullFloat64{
+				Float64: m[rowIdx][colIdx].Float64 / 2,
+				Valid:   m[rowIdx][colIdx].Valid,
+			}
 		}
 	}
 	fmt.Println(fmt.Sprintf("Took %v", time.Since(start)))
 }
 
 func BenchSqrt(data TimeSeries) {
-	result := make([][]float64, len(data))
+	result := make([][]sql.NullFloat64, len(data))
 
 	start := time.Now()
 	m := data.ToMatrix()
 	for rowIdx := 0; rowIdx < len(m); rowIdx++ {
-		result[rowIdx] = make([]float64, len(m[rowIdx]))
+		result[rowIdx] = make([]sql.NullFloat64, len(m[rowIdx]))
 		for colIdx := 0; colIdx < len(m[rowIdx]); colIdx++ {
 			value := m[rowIdx][colIdx]
-			result[rowIdx][colIdx] = math.Sqrt(value) + value/2 + math.Pow(value, 2) + math.Cos(math.Mod(value, 360))
+			if !value.Valid {
+				result[rowIdx][colIdx] = sql.NullFloat64{}
+			}
+			result[rowIdx][colIdx] = sql.NullFloat64{
+				Float64: math.Sqrt(value.Float64) + value.Float64/2 + math.Pow(value.Float64, 2) + math.Cos(math.Mod(value.Float64, 360)),
+				Valid:   true,
+			}
 		}
 	}
 	fmt.Println(fmt.Sprintf("Took %v", time.Since(start)))
@@ -45,7 +55,7 @@ func BenchDivideBy2Chunking(data TimeSeries) {
 
 	fmt.Println(fmt.Sprintf("Processing data using %d workers", numWorkers))
 	matrix := data.ToMatrix()
-	newMatrix := make([][]float64, len(data))
+	newMatrix := make([][]sql.NullFloat64, len(data))
 	var wg sync.WaitGroup
 
 	// Process data in parallel
@@ -62,10 +72,13 @@ func BenchDivideBy2Chunking(data TimeSeries) {
 		go func(start, end int) {
 			defer wg.Done()
 			for i := start; i < end; i++ {
-				newRowData := make([]float64, len(matrix[i]))
+				newRowData := make([]sql.NullFloat64, len(matrix[i]))
 				for col := 0; col < len(matrix[i]); col++ {
 					x := matrix[i][col]
-					newRowData[col] = x / 2
+					newRowData[col] = sql.NullFloat64{
+						Float64: x.Float64 / 2,
+						Valid:   x.Valid,
+					}
 					//newRowData[col] = math.Sqrt(x) + x/2 + math.Pow(x, 2) + math.Cos(math.Mod(x, 360))
 				}
 				newMatrix[i] = newRowData
@@ -86,7 +99,7 @@ func BenchSqrtChunking(data TimeSeries) {
 
 	fmt.Println(fmt.Sprintf("Processing data using %d workers", numWorkers))
 	matrix := data.ToMatrix()
-	newMatrix := make([][]float64, len(data))
+	newMatrix := make([][]sql.NullFloat64, len(data))
 	var wg sync.WaitGroup
 
 	// Process data in parallel
@@ -103,10 +116,16 @@ func BenchSqrtChunking(data TimeSeries) {
 		go func(start, end int) {
 			defer wg.Done()
 			for i := start; i < end; i++ {
-				newRowData := make([]float64, len(matrix[i]))
+				newRowData := make([]sql.NullFloat64, len(matrix[i]))
 				for col := 0; col < len(matrix[i]); col++ {
 					x := matrix[i][col]
-					newRowData[col] = math.Sqrt(x) + x/2 + math.Pow(x, 2) + math.Cos(math.Mod(x, 360))
+					if !x.Valid {
+						newRowData[col] = sql.NullFloat64{}
+					}
+					newRowData[col] = sql.NullFloat64{
+						Float64: math.Sqrt(x.Float64) + x.Float64/2 + math.Pow(x.Float64, 2) + math.Cos(math.Mod(x.Float64, 360)),
+						Valid:   true,
+					}
 				}
 				newMatrix[i] = newRowData
 			}
