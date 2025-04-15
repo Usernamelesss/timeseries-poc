@@ -1,36 +1,35 @@
 package utils
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/parquet-go/parquet-go"
 	"os"
 )
 
 type DataRow struct {
-	Param1  sql.NullFloat64 `parquet:"param_0"`
-	Param2  sql.NullFloat64 `parquet:"param_1"`
-	Param3  sql.NullFloat64 `parquet:"param_2"`
-	Param4  sql.NullFloat64 `parquet:"param_3"`
-	Param5  sql.NullFloat64 `parquet:"param_4"`
-	Param6  sql.NullFloat64 `parquet:"param_5"`
-	Param7  sql.NullFloat64 `parquet:"param_6"`
-	Param8  sql.NullFloat64 `parquet:"param_7"`
-	Param9  sql.NullFloat64 `parquet:"param_8"`
-	Param10 sql.NullFloat64 `parquet:"param_9"`
+	Param1  *float64 `parquet:"param_0"`
+	Param2  *float64 `parquet:"param_1"`
+	Param3  *float64 `parquet:"param_2"`
+	Param4  *float64 `parquet:"param_3"`
+	Param5  *float64 `parquet:"param_4"`
+	Param6  *float64 `parquet:"param_5"`
+	Param7  *float64 `parquet:"param_6"`
+	Param8  *float64 `parquet:"param_7"`
+	Param9  *float64 `parquet:"param_8"`
+	Param10 *float64 `parquet:"param_9"`
 }
 
 type TimeSeries []DataRow
 
-func (s *TimeSeries) ToMatrix() [][]sql.NullFloat64 {
+func (s *TimeSeries) ToMatrix() [][]*float64 {
 	if s == nil {
-		return make([][]sql.NullFloat64, 0)
+		return make([][]*float64, 0)
 	}
 
-	matrix := make([][]sql.NullFloat64, len(*s))
+	matrix := make([][]*float64, len(*s))
 	for i, row := range *s {
 		// Extract values from struct into a flat array
-		rowValues := []sql.NullFloat64{
+		rowValues := []*float64{
 			row.Param1, row.Param2, row.Param3, row.Param4, row.Param5,
 			row.Param6, row.Param7, row.Param8, row.Param9, row.Param10,
 		}
@@ -40,7 +39,7 @@ func (s *TimeSeries) ToMatrix() [][]sql.NullFloat64 {
 	return matrix
 }
 
-func FromMatrix(matrix [][]sql.NullFloat64) TimeSeries {
+func FromMatrix(matrix [][]*float64) TimeSeries {
 	if matrix == nil {
 		return TimeSeries{}
 	}
