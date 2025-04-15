@@ -56,3 +56,4 @@ docker-conf/minio-target/*
 .env
 .mise.local.toml
 go-poc/bin/
+results/
