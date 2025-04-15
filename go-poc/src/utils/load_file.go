@@ -76,3 +76,12 @@ func GetTimeseries() TimeSeries {
 
 	return data
 }
+
+func WriteTimeseries(filename string, ts TimeSeries) {
+	pathToFile := fmt.Sprintf("%s/results/%s", os.Getenv("PROJECT_ROOT"), filename)
+
+	err := parquet.WriteFile[DataRow](pathToFile, ts)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to write data: %v", err))
+	}
+}

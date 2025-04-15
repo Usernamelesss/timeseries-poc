@@ -4,29 +4,23 @@ import (
 	"fmt"
 	"math"
 	"sync"
-	"time"
 )
 
-func BenchDivideBy2(data TimeSeries) {
-	result := make([][]*float64, len(data))
+func DivideBy2(matrix [][]*float64) [][]*float64 {
+	result := make([][]*float64, len(matrix))
 
-	start := time.Now()
-	m := data.ToMatrix()
-	for rowIdx := 0; rowIdx < len(m); rowIdx++ {
-		result[rowIdx] = make([]*float64, len(m[rowIdx]))
-		for colIdx := 0; colIdx < len(m[rowIdx]); colIdx++ {
-			operationResult := *m[rowIdx][colIdx] / 2
+	for rowIdx := 0; rowIdx < len(matrix); rowIdx++ {
+		result[rowIdx] = make([]*float64, len(matrix[rowIdx]))
+		for colIdx := 0; colIdx < len(matrix[rowIdx]); colIdx++ {
+			operationResult := *matrix[rowIdx][colIdx] / 2
 			result[rowIdx][colIdx] = &operationResult
 		}
 	}
-	fmt.Println(fmt.Sprintf("Took %v", time.Since(start)))
+	return result
 }
 
-func BenchSqrt(data TimeSeries) {
-	result := make([][]*float64, len(data))
-
-	start := time.Now()
-	m := data.ToMatrix()
+func Sqrt(m [][]*float64) [][]*float64 {
+	result := make([][]*float64, len(m))
 	for rowIdx := 0; rowIdx < len(m); rowIdx++ {
 		result[rowIdx] = make([]*float64, len(m[rowIdx]))
 		for colIdx := 0; colIdx < len(m[rowIdx]); colIdx++ {
@@ -39,19 +33,17 @@ func BenchSqrt(data TimeSeries) {
 			result[rowIdx][colIdx] = &operationResult
 		}
 	}
-	fmt.Println(fmt.Sprintf("Took %v", time.Since(start)))
+	return result
 }
 
-func BenchDivideBy2Chunking(data TimeSeries) {
-	start := time.Now()
-
+func DivideBy2Chunking(m [][]*float64) [][]*float64 {
 	// Determine optimal number of goroutines based on available CPU cores
 	numWorkers := 4 //runtime.NumCPU()
-	rowsPerWorker := len(data) / numWorkers
+	rowsPerWorker := len(m) / numWorkers
+	fmt.Println(fmt.Sprintf("Processing data using %d workers and %d rows per worker", numWorkers, rowsPerWorker))
 
-	fmt.Println(fmt.Sprintf("Processing data using %d workers", numWorkers))
-	matrix := data.ToMatrix()
-	newMatrix := make([][]*float64, len(data))
+	newMatrix := make([][]*float64, len(m))
+
 	var wg sync.WaitGroup
 
 	// Process data in parallel
@@ -62,42 +54,38 @@ func BenchDivideBy2Chunking(data TimeSeries) {
 		endRow := startRow + rowsPerWorker
 
 		if w == numWorkers-1 {
-			endRow = len(data) // Handle remaining rows in last worker
+			endRow = len(m) // Handle remaining rows in last worker
 		}
 
 		go func(start, end int) {
 			defer wg.Done()
 			for i := start; i < end; i++ {
-				newRowData := make([]*float64, len(matrix[i]))
-				for col := 0; col < len(matrix[i]); col++ {
-					x := matrix[i][col]
+				newRowData := make([]*float64, len(m[i]))
+				for col := 0; col < len(m[i]); col++ {
+					x := m[i][col]
 					if x == nil {
 						newRowData[col] = nil
 						continue
 					}
 					operationResult := *x / 2
 					newRowData[col] = &operationResult
-					//newRowData[col] = math.Sqrt(x) + x/2 + math.Pow(x, 2) + math.Cos(math.Mod(x, 360))
 				}
 				newMatrix[i] = newRowData
 			}
 		}(startRow, endRow)
 	}
-
 	wg.Wait()
-	fmt.Println(fmt.Sprintf("Took %v", time.Since(start)))
+	return newMatrix
 }
 
-func BenchSqrtChunking(data TimeSeries) {
-	start := time.Now()
-
+func SqrtChunking(m [][]*float64) [][]*float64 {
 	// Determine optimal number of goroutines based on available CPU cores
 	numWorkers := 4 //runtime.NumCPU()
-	rowsPerWorker := len(data) / numWorkers
+	rowsPerWorker := len(m) / numWorkers
+	fmt.Println(fmt.Sprintf("Processing data using %d workers and %d rows per worker", numWorkers, rowsPerWorker))
 
-	fmt.Println(fmt.Sprintf("Processing data using %d workers", numWorkers))
-	matrix := data.ToMatrix()
-	newMatrix := make([][]*float64, len(data))
+	newMatrix := make([][]*float64, len(m))
+
 	var wg sync.WaitGroup
 
 	// Process data in parallel
@@ -108,15 +96,15 @@ func BenchSqrtChunking(data TimeSeries) {
 		endRow := startRow + rowsPerWorker
 
 		if w == numWorkers-1 {
-			endRow = len(data) // Handle remaining rows in last worker
+			endRow = len(m) // Handle remaining rows in last worker
 		}
 
 		go func(start, end int) {
 			defer wg.Done()
 			for i := start; i < end; i++ {
-				newRowData := make([]*float64, len(matrix[i]))
-				for col := 0; col < len(matrix[i]); col++ {
-					x := matrix[i][col]
+				newRowData := make([]*float64, len(m[i]))
+				for col := 0; col < len(m[i]); col++ {
+					x := m[i][col]
 					if x == nil {
 						newRowData[col] = nil
 						continue
@@ -128,7 +116,6 @@ func BenchSqrtChunking(data TimeSeries) {
 			}
 		}(startRow, endRow)
 	}
-
 	wg.Wait()
-	fmt.Println(fmt.Sprintf("Took %v", time.Since(start)))
+	return newMatrix
 }
