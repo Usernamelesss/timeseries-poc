@@ -5,8 +5,6 @@ import time
 import numpy as np
 import pandas as pd
 
-from pandas.testing import assert_frame_equal
-
 
 def divide_by_2(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -24,6 +22,10 @@ def vectorized_sqrt_formula(df: pd.DataFrame) -> pd.DataFrame:
     return np.sqrt(df) + df/2 + np.power(df, 2) + np.cos(df % 360)
 
 
+def exponential_moving_average(df: pd.DataFrame) -> pd.DataFrame:
+    return df.ewm(span=10, adjust=False, min_periods=10).mean()
+
+
 def bench(fn, *args, **kwargs) -> pd.DataFrame:
     start = time.monotonic_ns()
     r = fn(*args, **kwargs)
@@ -35,9 +37,15 @@ def bench(fn, *args, **kwargs) -> pd.DataFrame:
 
 if __name__ == '__main__':
     timeseries = pd.read_parquet(os.path.join(os.environ.get("PROJECT_ROOT", "/"), "fixtures", "sample_001.parquet"))
+    output_dir = os.path.join(os.environ.get("PROJECT_ROOT", "/"), "results")
+
+    os.makedirs(output_dir, exist_ok=True)
 
     r1 = bench(divide_by_2, timeseries)
-    r2 = bench(sqrt_formula, timeseries)
-    r3 = bench(vectorized_sqrt_formula, timeseries)
+    r1.to_parquet(os.path.join(output_dir, "python_divide_by2.parquet"))
 
-    assert_frame_equal(r2, r3, check_exact=False, rtol=1e-5)
+    r3 = bench(vectorized_sqrt_formula, timeseries)
+    r3.to_parquet(os.path.join(output_dir, "python_sqrt.parquet"))
+
+    r4 = bench(exponential_moving_average, timeseries)
+    r4.to_parquet(os.path.join(output_dir, "python_ema.parquet"))
