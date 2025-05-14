@@ -14,19 +14,19 @@ func main() {
 
 	matrix := data.ToMatrix()
 
-	r1 := utils.Bench("Divide by 2", func() [][]*float64 {
+	r1 := utils.Bench("Divide by 2", func() [][]float64 {
 		return utils.DivideBy2(matrix)
 	})
-	r2 := utils.Bench("Sqrt", func() [][]*float64 {
+	r2 := utils.Bench("Sqrt", func() [][]float64 {
 		return utils.Sqrt(matrix)
 	})
-	utils.Bench("Divide by 2 chunking", func() [][]*float64 {
+	utils.Bench("Divide by 2 chunking", func() [][]float64 {
 		return utils.DivideBy2Chunking(matrix)
 	})
-	utils.Bench("Sqrt chunking", func() [][]*float64 {
+	utils.Bench("Sqrt chunking", func() [][]float64 {
 		return utils.SqrtChunking(matrix)
 	})
-	r3 := utils.Bench("Exponential Moving Average", func() [][]*float64 {
+	r3 := utils.Bench("Exponential Moving Average", func() [][]float64 {
 		return ewma.ProcessDataFrame(matrix, 10, false, 10)
 	})
 

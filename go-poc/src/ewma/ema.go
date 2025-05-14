@@ -83,18 +83,18 @@ func ProcessSeries(values []float64, span float64, adjust bool, minPeriods int) 
 
 // ProcessDataFrame calculates EWMA for each column in a DataFrame-like structure
 // where data is represented as [][]float64 (rows of values)
-func ProcessDataFrame(data [][]*float64, span float64, adjust bool, minPeriods int) [][]*float64 {
+func ProcessDataFrame(data [][]float64, span float64, adjust bool, minPeriods int) [][]float64 {
 	if len(data) == 0 {
-		return [][]*float64{}
+		return [][]float64{}
 	}
 
 	numRows := len(data)
 	numCols := len(data[0])
 
 	// Create a result structure with the same dimensions
-	result := make([][]*float64, numRows)
+	result := make([][]float64, numRows)
 	for i := range result {
-		result[i] = make([]*float64, numCols)
+		result[i] = make([]float64, numCols)
 	}
 
 	// Create a calculator for each column
@@ -106,8 +106,7 @@ func ProcessDataFrame(data [][]*float64, span float64, adjust bool, minPeriods i
 	// Process each row
 	for row := 0; row < numRows; row++ {
 		for col := 0; col < numCols; col++ {
-			currentEma := calculators[col].Update(*data[row][col])
-			result[row][col] = &currentEma
+			result[row][col] = calculators[col].Update(data[row][col])
 		}
 	}
 

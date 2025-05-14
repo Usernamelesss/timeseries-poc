@@ -9,29 +9,29 @@ import (
 
 type DataRow struct {
 	Index   time.Time `parquet:"__index_level_0__"`
-	Param1  *float64  `parquet:"param_0"`
-	Param2  *float64  `parquet:"param_1"`
-	Param3  *float64  `parquet:"param_2"`
-	Param4  *float64  `parquet:"param_3"`
-	Param5  *float64  `parquet:"param_4"`
-	Param6  *float64  `parquet:"param_5"`
-	Param7  *float64  `parquet:"param_6"`
-	Param8  *float64  `parquet:"param_7"`
-	Param9  *float64  `parquet:"param_8"`
-	Param10 *float64  `parquet:"param_9"`
+	Param1  float64   `parquet:"param_0"`
+	Param2  float64   `parquet:"param_1"`
+	Param3  float64   `parquet:"param_2"`
+	Param4  float64   `parquet:"param_3"`
+	Param5  float64   `parquet:"param_4"`
+	Param6  float64   `parquet:"param_5"`
+	Param7  float64   `parquet:"param_6"`
+	Param8  float64   `parquet:"param_7"`
+	Param9  float64   `parquet:"param_8"`
+	Param10 float64   `parquet:"param_9"`
 }
 
 type TimeSeries []DataRow
 
-func (s *TimeSeries) ToMatrix() [][]*float64 {
+func (s *TimeSeries) ToMatrix() [][]float64 {
 	if s == nil {
-		return make([][]*float64, 0)
+		return make([][]float64, 0)
 	}
 
-	matrix := make([][]*float64, len(*s))
+	matrix := make([][]float64, len(*s))
 	for i, row := range *s {
 		// Extract values from struct into a flat array
-		rowValues := []*float64{
+		rowValues := []float64{
 			row.Param1, row.Param2, row.Param3, row.Param4, row.Param5,
 			row.Param6, row.Param7, row.Param8, row.Param9, row.Param10,
 		}
@@ -54,7 +54,7 @@ func (s *TimeSeries) GetIndex() []time.Time {
 	return index
 }
 
-func FromMatrix(matrix [][]*float64, index []time.Time) TimeSeries {
+func FromMatrix(matrix [][]float64, index []time.Time) TimeSeries {
 	if matrix == nil {
 		return TimeSeries{}
 	}
