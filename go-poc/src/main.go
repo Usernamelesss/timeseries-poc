@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-poc/src/ewma"
 	"go-poc/src/utils"
 )
 
@@ -26,7 +27,7 @@ func main() {
 		return utils.SqrtChunking(matrix)
 	})
 	r3 := utils.Bench("Exponential Moving Average", func() [][]*float64 {
-		return utils.ExponentialMovingAverage(matrix)
+		return ewma.ProcessDataFrame(matrix, 10, false, 10)
 	})
 
 	utils.WriteTimeseries("golang_divide_by2.parquet", utils.FromMatrix(r1, data.GetIndex()))
