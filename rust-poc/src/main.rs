@@ -8,73 +8,54 @@ use std::io::BufWriter;
 pub mod utils;
 
 fn divide_by2(df: &DataFrame) -> DataFrame {
-    return df
-        .clone()
-        .lazy()
-        .select([
-            col("param_0") / lit(2.0),
-            col("param_1") / lit(2.0),
-            col("param_2") / lit(2.0),
-            col("param_3") / lit(2.0),
-            col("param_4") / lit(2.0),
-            col("param_5") / lit(2.0),
-            col("param_6") / lit(2.0),
-            col("param_7") / lit(2.0),
-            col("param_8") / lit(2.0),
-            col("param_9") / lit(2.0),
-        ])
-        .collect()
-        .unwrap();
+    let lazy = df.clone().lazy();
+    // Get schema to extract all column names
+    let schema = df.schema();
+
+    // Create expressions: col(name) / 2.0
+    let exprs: Vec<Expr> = schema
+        .iter_fields()
+        .map(|field| {
+            let name = field.name().as_str();
+            if field.dtype != DataType::Float64 {
+                return col(name);
+            }
+            (col(name) / lit(2.0)).alias(name)
+        })
+        .collect();
+
+    // Select transformed expressions
+    return lazy.select(exprs).collect().unwrap();
+
 }
 
 fn sqrt(df: &DataFrame) -> DataFrame {
-    return df
-        .clone()
-        .lazy()
-        .select([
-            col("param_0").sqrt()
-                + (col("param_0") / lit(2.0))
-                + col("param_0").pow(2.0)
-                + (col("param_0") % lit(360.0)).cos(),
-            col("param_1").sqrt()
-                + (col("param_1") / lit(2.0))
-                + col("param_1").pow(2.0)
-                + (col("param_1") % lit(360.0)).cos(),
-            col("param_2").sqrt()
-                + (col("param_2") / lit(2.0))
-                + col("param_2").pow(2.0)
-                + (col("param_2") % lit(360.0)).cos(),
-            col("param_3").sqrt()
-                + (col("param_3") / lit(2.0))
-                + col("param_3").pow(2.0)
-                + (col("param_3") % lit(360.0)).cos(),
-            col("param_4").sqrt()
-                + (col("param_4") / lit(2.0))
-                + col("param_4").pow(2.0)
-                + (col("param_4") % lit(360.0)).cos(),
-            col("param_5").sqrt()
-                + (col("param_5") / lit(2.0))
-                + col("param_5").pow(2.0)
-                + (col("param_5") % lit(360.0)).cos(),
-            col("param_6").sqrt()
-                + (col("param_6") / lit(2.0))
-                + col("param_6").pow(2.0)
-                + (col("param_6") % lit(360.0)).cos(),
-            col("param_7").sqrt()
-                + (col("param_7") / lit(2.0))
-                + col("param_7").pow(2.0)
-                + (col("param_7") % lit(360.0)).cos(),
-            col("param_8").sqrt()
-                + (col("param_8") / lit(2.0))
-                + col("param_8").pow(2.0)
-                + (col("param_8") % lit(360.0)).cos(),
-            col("param_9").sqrt()
-                + (col("param_9") / lit(2.0))
-                + col("param_9").pow(2.0)
-                + (col("param_9") % lit(360.0)).cos(),
-        ])
-        .collect()
-        .unwrap();
+    let lf = df.clone().lazy();
+    // Get the schema so we know which columns to operate on
+    let schema = df.schema();
+
+    // Build expressions for each column
+    let exprs: Vec<Expr> = schema
+        .iter_fields()
+        .map(|field| {
+            let name = field.name().as_str();
+            let col = col(name);
+
+            if field.dtype != DataType::Float64 {
+                return col; // polars::prelude::col(name);
+            }
+
+            // Apply the full expression: sqrt(col) + col / 2 + col^2 + cos(col % 360)
+            (col.clone().sqrt()
+                + col.clone() / lit(2.0)
+                + col.clone().pow(lit(2.0))
+                + (col % lit(360.0)).cos())
+                .alias(name)
+        })
+        .collect();
+
+    // Project all transformed columns
+    return lf.select(exprs).collect().unwrap();
 }
 
 fn main() {
@@ -84,8 +65,6 @@ fn main() {
 
     let df = ParquetReader::new(&mut file)
         .finish()
-        .unwrap()
-        .drop("__index_level_0__") // remove index column since Polars doesn't use it
         .unwrap();
 
     println!("Loaded {} rows and {} cols", df.height(), df.width());
