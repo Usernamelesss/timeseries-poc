@@ -26,12 +26,12 @@ def exponential_moving_average(df: pd.DataFrame) -> pd.DataFrame:
     return df.ewm(span=10, adjust=False, min_periods=10).mean()
 
 
-def bench(fn, *args, **kwargs) -> pd.DataFrame:
+def bench(description, fn, *args, **kwargs) -> pd.DataFrame:
     start = time.monotonic_ns()
     r = fn(*args, **kwargs)
     end = time.monotonic_ns()
     elapsed = (end - start) / 1e+6
-    print("Took {:0.2f} ms".format(elapsed))
+    print("{} took {:0.2f} ms".format(description, elapsed))
     return r
 
 
@@ -41,11 +41,11 @@ if __name__ == '__main__':
 
     os.makedirs(output_dir, exist_ok=True)
 
-    r1 = bench(divide_by_2, timeseries)
+    r1 = bench("Divide By 2", divide_by_2, timeseries)
     r1.to_parquet(os.path.join(output_dir, "python_divide_by2.parquet"))
 
-    r3 = bench(vectorized_sqrt_formula, timeseries)
+    r3 = bench("Sqrt", vectorized_sqrt_formula, timeseries)
     r3.to_parquet(os.path.join(output_dir, "python_sqrt.parquet"))
 
-    r4 = bench(exponential_moving_average, timeseries)
+    r4 = bench("EWMA", exponential_moving_average, timeseries)
     r4.to_parquet(os.path.join(output_dir, "python_ema.parquet"))
