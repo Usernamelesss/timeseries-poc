@@ -4,6 +4,7 @@ services:
       context: ./go-poc
     volumes:
       - ./fixtures/sample_001.parquet:/fixtures/sample_001.parquet
+      - ./results:/results
     deploy:
       resources:
         limits:
@@ -15,6 +16,7 @@ services:
       context: ./python-poc
     volumes:
       - ./fixtures/sample_001.parquet:/fixtures/sample_001.parquet
+      - ./results:/results
     deploy:
       resources:
         limits:
@@ -26,6 +28,7 @@ services:
       context: ./node-poc
     volumes:
       - ./fixtures/sample_001.parquet:/fixtures/sample_001.parquet
+      - ./results:/results
     deploy:
       resources:
         limits:
@@ -38,6 +41,7 @@ services:
       context: ./rust-poc
     volumes:
       - ./fixtures/sample_001.parquet:/fixtures/sample_001.parquet
+      - ./results:/results
     deploy:
       resources:
         limits:
