@@ -58,6 +58,19 @@ fn sqrt(df: &DataFrame) -> DataFrame {
     return lf.select(exprs).collect().unwrap();
 }
 
+fn ewma(df: &DataFrame) -> DataFrame {
+    return df.clone()
+        .lazy()
+        .with_columns([dtype_cols([DataType::Float64]).ewm_mean(EWMOptions{
+            alpha: 2.0 / (10.0 + 1.0), // Equivalent to span = 10
+            adjust: false,
+            min_periods: 10,
+            ignore_nulls: false, // Default in pandas is false for ewm
+            bias: false,
+        })])
+        .collect().unwrap()
+}
+
 fn main() {
     let project_root = env::var("PROJECT_ROOT").unwrap_or(String::new());
     let file_name = format!("{project_root}/fixtures/sample_001.parquet");
@@ -71,7 +84,7 @@ fn main() {
 
     let mut r1 = bench::simple_bench(String::from("Divide By 2"), divide_by2, &df);
     let mut r2 = bench::simple_bench(String::from("Simple Sqrt"), sqrt, &df);
-    // println!("{}", df.head(Some(1)));
+    let mut r3 = bench::simple_bench(String::from("EWMA"), ewma, &df);
 
     // Write results
     let r1_writer = &mut BufWriter::new(
@@ -86,4 +99,11 @@ fn main() {
     ParquetWriter::new(r2_writer)
         .finish(&mut r2)
         .expect("Cannot write result 2");
+    let r3_writer = &mut BufWriter::new(
+        File::create(format!("{project_root}/results/rust_ema.parquet")).unwrap(),
+    );
+    ParquetWriter::new(r3_writer)
+        .finish(&mut r3)
+        .expect("Cannot write result 3");
+
 }
