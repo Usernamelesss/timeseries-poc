@@ -1,10 +1,15 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use polars::prelude::DataFrame;
+use std::time::Instant;
 
-pub(crate) fn simple_bench(name: String, f: fn(&DataFrame) -> DataFrame, arg: &DataFrame) -> DataFrame {
-    let start = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+pub(crate) fn simple_bench(
+    name: String,
+    f: fn(&DataFrame) -> DataFrame,
+    arg: &DataFrame,
+) -> (DataFrame, u128) {
+    let start = Instant::now();
     let result = f(arg);
-    let end = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    println!("{} took {} ms", name, (end - start).as_millis());
-    return result;
+    let end = Instant::now();
+    let elapsed = (end - start).as_millis();
+    println!("{} took {} ms", name, elapsed);
+    return (result, elapsed);
 }

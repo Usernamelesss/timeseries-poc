@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 polars = { version = "0.48.1", features = ["parquet", "lazy", "trigonometry", "ewma"] }
+csv = "1.3.1"

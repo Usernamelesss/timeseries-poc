@@ -1,4 +1,4 @@
-use crate::utils::bench;
+use crate::utils::{bench, csv_writer};
 use polars::prelude::*;
 use polars::prelude::{col, lit};
 use std::env;
@@ -82,9 +82,9 @@ fn main() {
 
     println!("Loaded {} rows and {} cols", df.height(), df.width());
 
-    let mut r1 = bench::simple_bench(String::from("Divide By 2"), divide_by2, &df);
-    let mut r2 = bench::simple_bench(String::from("Simple Sqrt"), sqrt, &df);
-    let mut r3 = bench::simple_bench(String::from("EWMA"), ewma, &df);
+    let (mut r1, elapsed1) = bench::simple_bench(String::from("Divide By 2"), divide_by2, &df);
+    let (mut r2, elapsed2) = bench::simple_bench(String::from("Simple Sqrt"), sqrt, &df);
+    let (mut r3, elapsed3) = bench::simple_bench(String::from("EWMA"), ewma, &df);
 
     // Write results
     let r1_writer = &mut BufWriter::new(
@@ -106,4 +106,5 @@ fn main() {
         .finish(&mut r3)
         .expect("Cannot write result 3");
 
+    csv_writer::write_timing([elapsed1, elapsed2, elapsed3]).expect("Cannot write results into CSV");
 }
