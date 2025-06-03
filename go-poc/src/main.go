@@ -7,14 +7,14 @@ import (
 )
 
 func main() {
-	data := utils.GetTimeseries()
+	data := utils.ReadParquet()
 	writeDf := os.Getenv("WRITE_RESULT_PARQUET")
 
 	/*
 		Is it fair or not including in the benchmark serialization/deserialization between TimeSeries <--> [][]*float64 ?
 	*/
 
-	matrix := data.ToMatrix()
+	matrix := data.Matrix
 
 	r1, elapsed1 := utils.Bench("Divide By 2", func() [][]float64 {
 		return utils.DivideBy2(matrix)
@@ -32,10 +32,11 @@ func main() {
 		return ewma.ProcessDataFrame(matrix, 10, false, 10)
 	})
 
+	writeDf = "true"
 	if writeDf == "true" {
-		utils.WriteTimeseries("golang_divide_by2.parquet", utils.FromMatrix(r1, data.GetIndex()))
-		utils.WriteTimeseries("golang_sqrt.parquet", utils.FromMatrix(r2, data.GetIndex()))
-		utils.WriteTimeseries("golang_ema.parquet", utils.FromMatrix(r3, data.GetIndex()))
+		utils.WriteTimeseries("golang_divide_by2.parquet", utils.FromMatrix(r1, data.Index))
+		utils.WriteTimeseries("golang_sqrt.parquet", utils.FromMatrix(r2, data.Index))
+		utils.WriteTimeseries("golang_ema.parquet", utils.FromMatrix(r3, data.Index))
 	}
 
 	utils.WriteTimings(elapsed1, elapsed2, elapsed3)
