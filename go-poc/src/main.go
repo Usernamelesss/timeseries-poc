@@ -3,10 +3,12 @@ package main
 import (
 	"go-poc/src/ewma"
 	"go-poc/src/utils"
+	"os"
 )
 
 func main() {
 	data := utils.GetTimeseries()
+	writeDf := os.Getenv("WRITE_RESULT_PARQUET")
 
 	/*
 		Is it fair or not including in the benchmark serialization/deserialization between TimeSeries <--> [][]*float64 ?
@@ -30,9 +32,11 @@ func main() {
 		return ewma.ProcessDataFrame(matrix, 10, false, 10)
 	})
 
-	utils.WriteTimeseries("golang_divide_by2.parquet", utils.FromMatrix(r1, data.GetIndex()))
-	utils.WriteTimeseries("golang_sqrt.parquet", utils.FromMatrix(r2, data.GetIndex()))
-	utils.WriteTimeseries("golang_ema.parquet", utils.FromMatrix(r3, data.GetIndex()))
+	if writeDf == "true" {
+		utils.WriteTimeseries("golang_divide_by2.parquet", utils.FromMatrix(r1, data.GetIndex()))
+		utils.WriteTimeseries("golang_sqrt.parquet", utils.FromMatrix(r2, data.GetIndex()))
+		utils.WriteTimeseries("golang_ema.parquet", utils.FromMatrix(r3, data.GetIndex()))
+	}
 
 	utils.WriteTimings(elapsed1, elapsed2, elapsed3)
 }

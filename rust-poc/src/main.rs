@@ -73,6 +73,8 @@ fn ewma(df: &DataFrame) -> DataFrame {
 
 fn main() {
     let project_root = env::var("PROJECT_ROOT").unwrap_or(String::new());
+    let write_df = env::var("WRITE_RESULT_PARQUET").unwrap_or(String::from("false"));
+
     let file_name = format!("{project_root}/fixtures/sample_001.parquet");
     let mut file = File::open(file_name).unwrap();
 
@@ -87,24 +89,25 @@ fn main() {
     let (mut r3, elapsed3) = bench::simple_bench(String::from("EWMA"), ewma, &df);
 
     // Write results
-    let r1_writer = &mut BufWriter::new(
-        File::create(format!("{project_root}/results/rust_divide_by2.parquet")).unwrap(),
-    );
-    ParquetWriter::new(r1_writer)
-        .finish(&mut r1)
-        .expect("Cannot write result 1");
-    let r2_writer = &mut BufWriter::new(
-        File::create(format!("{project_root}/results/rust_sqrt.parquet")).unwrap(),
-    );
-    ParquetWriter::new(r2_writer)
-        .finish(&mut r2)
-        .expect("Cannot write result 2");
-    let r3_writer = &mut BufWriter::new(
-        File::create(format!("{project_root}/results/rust_ema.parquet")).unwrap(),
-    );
-    ParquetWriter::new(r3_writer)
-        .finish(&mut r3)
-        .expect("Cannot write result 3");
-
+    if write_df == "true" {
+        let r1_writer = &mut BufWriter::new(
+            File::create(format!("{project_root}/results/rust_divide_by2.parquet")).unwrap(),
+        );
+        ParquetWriter::new(r1_writer)
+            .finish(&mut r1)
+            .expect("Cannot write result 1");
+        let r2_writer = &mut BufWriter::new(
+            File::create(format!("{project_root}/results/rust_sqrt.parquet")).unwrap(),
+        );
+        ParquetWriter::new(r2_writer)
+            .finish(&mut r2)
+            .expect("Cannot write result 2");
+        let r3_writer = &mut BufWriter::new(
+            File::create(format!("{project_root}/results/rust_ema.parquet")).unwrap(),
+        );
+        ParquetWriter::new(r3_writer)
+            .finish(&mut r3)
+            .expect("Cannot write result 3");
+    }
     csv_writer::write_timing([elapsed1, elapsed2, elapsed3]).expect("Cannot write results into CSV");
 }

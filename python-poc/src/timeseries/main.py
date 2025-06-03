@@ -39,16 +39,18 @@ if __name__ == '__main__':
     timeseries = pd.read_parquet(os.path.join(os.environ.get("PROJECT_ROOT", "/"), "fixtures", "sample_001.parquet"))
     output_dir = os.path.join(os.environ.get("PROJECT_ROOT", "/"), "results")
 
+    write_df = os.environ.get("WRITE_RESULT_PARQUET")
+
     os.makedirs(output_dir, exist_ok=True)
 
     r1, elapsed1 = bench("Divide By 2", divide_by_2, timeseries)
-    r1.to_parquet(os.path.join(output_dir, "python_divide_by2.parquet"))
-
     r3, elapsed2 = bench("Sqrt", vectorized_sqrt_formula, timeseries)
-    r3.to_parquet(os.path.join(output_dir, "python_sqrt.parquet"))
-
     r4, elapsed3 = bench("EWMA", exponential_moving_average, timeseries)
-    r4.to_parquet(os.path.join(output_dir, "python_ema.parquet"))
+
+    if write_df == "true":
+        r1.to_parquet(os.path.join(output_dir, "python_divide_by2.parquet"))
+        r3.to_parquet(os.path.join(output_dir, "python_sqrt.parquet"))
+        r4.to_parquet(os.path.join(output_dir, "python_ema.parquet"))
 
     timing_path = os.path.join(output_dir, "python_timing.csv")
     timing_df = pd.DataFrame({
