@@ -5,6 +5,8 @@ services:
     volumes:
       - ./fixtures/sample_001.parquet:/fixtures/sample_001.parquet
       - ./results:/results
+    environment:
+      WRITE_RESULT_PARQUET: false
     deploy:
       resources:
         limits:
@@ -17,6 +19,8 @@ services:
     volumes:
       - ./fixtures/sample_001.parquet:/fixtures/sample_001.parquet
       - ./results:/results
+    environment:
+      WRITE_RESULT_PARQUET: false
     deploy:
       resources:
         limits:
@@ -42,9 +46,10 @@ services:
     volumes:
       - ./fixtures/sample_001.parquet:/fixtures/sample_001.parquet
       - ./results:/results
+    environment:
+      WRITE_RESULT_PARQUET: false
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: 500m  # 1.5 gb, with less the container is OOM killed
-
+          memory: 500m  # 500 megabytes
