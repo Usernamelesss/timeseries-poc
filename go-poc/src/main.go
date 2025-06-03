@@ -32,7 +32,6 @@ func main() {
 		return ewma.ProcessDataFrame(matrix, 10, false, 10)
 	})
 
-	writeDf = "true"
 	if writeDf == "true" {
 		utils.WriteTimeseries("golang_divide_by2.parquet", utils.FromMatrix(r1, data.Index))
 		utils.WriteTimeseries("golang_sqrt.parquet", utils.FromMatrix(r2, data.Index))
