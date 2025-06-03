@@ -1,5 +1,5 @@
 [tools]
-poetry = { version = "1.7", pyproject = "{{config_root}}/python-poc/pyproject.toml" }
+poetry = "1.7"
 python = { version = "3.12", virtualenv = "{{config_root}}/python-poc/.venv" } # must be after poetry so the poetry bin is first in PATH
 
 go = "1.22.12"
