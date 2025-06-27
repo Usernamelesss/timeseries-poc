@@ -7,14 +7,14 @@ COPY Cargo.toml .
 RUN mkdir src && touch src/lib.rs
 # Run cargo build on a "dummy" project
 # This only builds the dependencies
-RUN cargo build
+RUN cargo build --release
 
 # Second step: build local crate(s)
 # Copy the actual source files
 COPY src src
 # Run the final cargo build
 # Dependencies are already built here, only local crates are built
-RUN cargo build
+RUN cargo build --release
 
 
-ENTRYPOINT ["cargo", "run"]
+ENTRYPOINT ["cargo", "run", "--release"]
