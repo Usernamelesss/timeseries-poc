@@ -1,6 +1,8 @@
 
 set -e
 
+rm -rf ./results/*  # Remove previous execution results
+
 for i in $(seq 1 20);
 do
     echo $i
